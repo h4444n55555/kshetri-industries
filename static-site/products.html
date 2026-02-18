@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Kshetri Industries — Products</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">
+        <img src="assets/logo.svg" alt="logo">
+        <span>Kshetri Industries</span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="about.html">About</a>
+        <a href="contact.html" class="cta">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Products</h1>
+    <p>We manufacture a range of industrial components and assemblies. Below are representative product categories.</p>
+
+    <section class="product-list grid">
+      <article class="card">
+        <h3>Structural Components</h3>
+        <p>Load-bearing parts manufactured to strict tolerances.</p>
+      </article>
+      <article class="card">
+        <h3>Fittings & Fasteners</h3>
+        <p>Precision fittings, connectors and fasteners for assemblies.</p>
+      </article>
+      <article class="card">
+        <h3>Machined Parts</h3>
+        <p>CNC-machined components for prototypes and production runs.</p>
+      </article>
+      <article class="card">
+        <h3>Custom Orders</h3>
+        <p>We manufacture to print — small or large volume.</p>
+      </article>
+    </section>
+
+    <p class="center"><a class="button" href="contact.html">Request a Quote</a></p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div><strong>Kshetri Industries</strong><p>Manufacturing & Supply</p></div>
+      <nav><a href="index.html">Home</a> <a href="about.html">About</a> <a href="contact.html">Contact</a></nav>
+    </div>
+    <div class="legal container">© <span id="year"></span> Kshetri Industries</div>
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

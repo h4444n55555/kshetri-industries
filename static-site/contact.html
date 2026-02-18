@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Contact — Kshetri Industries</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">
+        <img src="assets/logo.svg" alt="logo">
+        <span>Kshetri Industries</span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="about.html">About</a>
+        <a href="contact.html" class="cta">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Contact</h1>
+    <p>For inquiries or quotes, please reach out using the details below or send a message using the simple form.</p>
+
+    <section class="contact-grid">
+      <div class="card">
+        <h3>Contact Details</h3>
+        <p>Phone: +1 (555) 123-4567</p>
+        <p>Email: info@kshetri-industries.example</p>
+        <p>Address: 123 Industrial Park, City, Country</p>
+      </div>
+
+      <form class="card contact-form" action="#" onsubmit="alert('Form submitted locally. Replace with mailto or backend when ready.'); return false;">
+        <label>Name<input type="text" name="name" required></label>
+        <label>Email<input type="email" name="email" required></label>
+        <label>Message<textarea name="message" rows="5" required></textarea></label>
+        <p><button class="button" type="submit">Send Message</button></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div><strong>Kshetri Industries</strong><p>Manufacturing & Supply</p></div>
+      <nav><a href="index.html">Home</a> <a href="products.html">Products</a> <a href="about.html">About</a></nav>
+    </div>
+    <div class="legal container">© <span id="year"></span> Kshetri Industries</div>
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kshetri Industries</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#3b82f6",
+              "primary-dark": "#2563eb",
+              "background-light": "#eef2f6", 
+              "slate-800": "#1e293b",
+              "text-main": "#334155",
+              "text-muted": "#64748b"
+            },
+            fontFamily: {
+              "display": ["Work Sans", "sans-serif"],
+              "sans": ["Work Sans", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.5rem",
+              "xl": "1rem",
+              "2xl": "1.5rem",
+              "3xl": "2.5rem",
+              "4xl": "3rem"
+            },
+             boxShadow: {
+                'clay': '18px 18px 36px #d1d9e6, -18px -18px 36px #ffffff',
+                'clay-lg': '24px 24px 48px #d1d9e6, -24px -24px 48px #ffffff',
+                'clay-md': '12px 12px 24px #d1d9e6, -12px -12px 24px #ffffff',
+                'clay-sm': '8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff',
+                'clay-btn': '9px 9px 18px #d1d9e6, -9px -9px 18px #ffffff',
+                'clay-inset': 'inset 8px 8px 16px #d1d9e6, inset -8px -8px 16px #ffffff',
+                'clay-inset-sm': 'inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff',
+                'glow-primary': '0 0 20px rgba(59, 130, 246, 0.5)',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Work Sans', sans-serif;
+        background-color: #eef2f6;
+        color: #334155;
+      }
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 12px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #eef2f6; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1; 
+        border-radius: 6px;
+        border: 3px solid #eef2f6;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8; 
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.13.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

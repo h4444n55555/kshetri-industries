@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Kshetri Industries — Home</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">
+        <img src="assets/logo.svg" alt="Kshetri Industries logo">
+        <span>Kshetri Industries</span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="about.html">About</a>
+        <a href="contact.html" class="cta">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <h1>Quality Industrial Products, Built Locally</h1>
+        <p>Reliable manufacturing, trusted supply and dedicated service across diverse industries.</p>
+        <p class="hero-actions"><a class="button" href="products.html">See Products</a> <a class="button ghost" href="contact.html">Get a Quote</a></p>
+      </div>
+    </section>
+
+    <section class="features container">
+      <article>
+        <h3>Manufacturing Excellence</h3>
+        <p>Precision processes and strict QC ensure durable, high-performance products.</p>
+      </article>
+      <article>
+        <h3>Custom Solutions</h3>
+        <p>We work with customers to deliver components tailored to exact specifications.</p>
+      </article>
+      <article>
+        <h3>Sustainable Practices</h3>
+        <p>Committed to efficient resource use and environmentally responsible methods.</p>
+      </article>
+    </section>
+
+    <section class="products-preview">
+      <div class="container">
+        <h2>Featured Products</h2>
+        <div class="grid">
+          <article class="card">
+            <h4>Product A</h4>
+            <p>High-strength component for industrial assemblies.</p>
+          </article>
+          <article class="card">
+            <h4>Product B</h4>
+            <p>Corrosion-resistant fittings with precision tolerances.</p>
+          </article>
+          <article class="card">
+            <h4>Product C</h4>
+            <p>Custom-machined parts for specialized equipment.</p>
+          </article>
+        </div>
+        <p class="center"><a class="button" href="products.html">View All Products</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>Kshetri Industries</strong>
+        <p>Manufacturing & Supply</p>
+      </div>
+      <nav>
+        <a href="products.html">Products</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+    <div class="legal container">© <span id="year"></span> Kshetri Industries — All rights reserved.</div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

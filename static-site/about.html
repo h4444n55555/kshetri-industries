@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>About — Kshetri Industries</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">
+        <img src="assets/logo.svg" alt="logo">
+        <span>Kshetri Industries</span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="about.html">About</a>
+        <a href="contact.html" class="cta">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>About Us</h1>
+    <p>Kshetri Industries is a family-run manufacturing company committed to quality, timely delivery and customer-focused engineering.</p>
+
+    <section class="two-col">
+      <div>
+        <h3>Our Mission</h3>
+        <p>To deliver dependable industrial products while maintaining sustainable and ethical manufacturing practices.</p>
+      </div>
+      <div>
+        <h3>Capabilities</h3>
+        <ul>
+          <li>CNC machining</li>
+          <li>Metal fabrication</li>
+          <li>Assembly & testing</li>
+          <li>Custom engineering</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div><strong>Kshetri Industries</strong><p>Manufacturing & Supply</p></div>
+      <nav><a href="index.html">Home</a> <a href="products.html">Products</a> <a href="contact.html">Contact</a></nav>
+    </div>
+    <div class="legal container">© <span id="year"></span> Kshetri Industries</div>
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

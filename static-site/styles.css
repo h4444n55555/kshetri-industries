@@ -1,0 +1,42 @@
+/* Simple, modern static site styles */
+:root{
+  --accent:#0b6efd;
+  --bg:#f7f8fb;
+  --muted:#6b7280;
+  --max-width:1100px;
+}
+*{box-sizing:border-box}
+body{font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif;margin:0;color:#111;background:var(--bg);line-height:1.5}
+.container{max-width:var(--max-width);margin:0 auto;padding:1.25rem}
+.site-header{background:#fff;box-shadow:0 1px 4px rgba(16,24,40,.06)}
+.header-inner{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:.5rem;text-decoration:none;color:inherit}
+.logo img{width:40px;height:40px}
+.nav a{margin-left:1rem;text-decoration:none;color:var(--muted)}
+.nav a.cta{padding:.5rem .75rem;background:var(--accent);color:#fff;border-radius:6px}
+.hero{padding:3.5rem 0;background:linear-gradient(180deg,#ffffff 0%,#f1f5f9 100%)}
+.hero-inner h1{font-size:2rem;margin:0 0 .5rem}
+.hero-inner p{color:var(--muted);margin:.25rem 0}
+.hero-actions .button{margin-right:.5rem}
+.button{display:inline-block;padding:.6rem 1rem;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none}
+.button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(11,110,253,.12)}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;padding:2rem 0}
+.features article{background:#fff;padding:1rem;border-radius:8px;box-shadow:0 1px 3px rgba(16,24,40,.04)}
+.products-preview{padding:2.5rem 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.card{background:#fff;padding:1rem;border-radius:8px}
+.center{text-align:center}
+.site-footer{margin-top:2rem;padding:1.5rem 0;background:#fff}
+.footer-inner{display:flex;justify-content:space-between;align-items:center}
+.legal{color:var(--muted);font-size:.9rem;padding-top:.5rem}
+.product-list .card{min-height:120px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.contact-form label{display:block;margin-bottom:.75rem}
+.contact-form input,.contact-form textarea{width:100%;padding:.5rem;border:1px solid #e6e9ef;border-radius:6px}
+@media(max-width:700px){
+  .header-inner{flex-direction:row;gap:1rem}
+  .two-col,.contact-grid{grid-template-columns:1fr}
+  .hero-inner h1{font-size:1.5rem}
+  .nav{display:none}
+}
