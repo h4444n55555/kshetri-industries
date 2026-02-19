@@ -26,20 +26,20 @@ export const Footer: React.FC = () => {
             <h4 className="font-bold text-lg text-slate-800">Contact Us</h4>
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-background-light shadow-clay-btn hover:shadow-clay-sm transition-shadow">
-                <span className="material-symbols-outlined text-primary text-xl">location_on</span>
+                <span className="material-symbols-outlined text-primary text-xl shrink-0">location_on</span>
                 <span className="text-sm font-medium text-slate-600">
                   Uchekon, Imphal East, <br/>Manipur, India
                 </span>
               </div>
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-background-light shadow-clay-btn hover:shadow-clay-sm transition-shadow">
-                <span className="material-symbols-outlined text-primary text-xl">mail</span>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-slate-600">Kshetriindustriespvtltd@gmail.com</span>
-                  <span className="text-xs text-slate-500">tojokshtrimayum@gmail.com</span>
+                <span className="material-symbols-outlined text-primary text-xl shrink-0">mail</span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-medium text-slate-600 break-all">Kshetriindustriespvtltd@gmail.com</span>
+                  <span className="text-xs text-slate-500 break-all">tojokshtrimayum@gmail.com</span>
                 </div>
               </div>
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-background-light shadow-clay-btn hover:shadow-clay-sm transition-shadow">
-                <span className="material-symbols-outlined text-primary text-xl">phone</span>
+                <span className="material-symbols-outlined text-primary text-xl shrink-0">phone</span>
                 <span className="text-sm font-medium text-slate-600">+91 87318 68226</span>
               </div>
             </div>

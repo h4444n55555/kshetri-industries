@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ClayCard } from '../components/ClayCard';
 
 const HomePage: React.FC = () => {
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -41,9 +43,6 @@ const HomePage: React.FC = () => {
             <h2 className="text-3xl font-black text-slate-800 md:text-5xl leading-tight">
               About Our Company
             </h2>
-            <div className="h-2 w-24 rounded-full bg-background-light shadow-clay-inset">
-               <div className="h-full w-1/2 bg-primary rounded-full"></div>
-            </div>
             <p className="text-lg leading-loose text-text-muted font-medium">
               Kshetri Industries Pvt. Ltd., incorporated in 2025, is a forward-looking food and beverage company founded by Mr. Kshetrimayum Tojo Singh and co-founded by Mr. Nongmaithem Hans Nathanael Gabil Momin. With over six years of hands-on industry experience, the company formalizes earlier entrepreneurial efforts into a compliant private limited structure focused on sustainable growth.
             </p>
@@ -116,6 +115,22 @@ const HomePage: React.FC = () => {
             </ClayCard>
           </div>
         </section>
+
+        {/* CTA Section */}
+        <section className="flex justify-center py-8">
+            <button 
+              onClick={() => {
+                navigate('/products');
+                window.scrollTo(0, 0);
+              }}
+              className="group relative px-10 py-5 bg-background-light rounded-2xl shadow-clay-btn hover:shadow-clay-lg hover:-translate-y-1 active:shadow-clay-inset active:translate-y-0 transition-all duration-300 flex items-center gap-4 border border-white/50"
+            >
+               <span className="text-xl font-black text-slate-800 group-hover:text-primary transition-colors">View Our Products</span>
+               <div className="h-10 w-10 rounded-xl bg-background-light shadow-clay-inset flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined">arrow_forward</span>
+               </div>
+            </button>
+         </section>
 
       </main>
     </div>
