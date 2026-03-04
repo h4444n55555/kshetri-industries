@@ -177,45 +177,34 @@ const GrainLogo: React.FC<GrainLogoProps> = ({ className }) => {
         canvas.addEventListener('mouseleave', onMouseLeave);
         canvas.addEventListener('touchmove', onTouchMove, { passive: true });
 
-        const render = (now: number) => {
-            stateRef.current.animId = requestAnimationFrame(render);
+        const isTouch = navigator.maxTouchPoints > 0;
+        let mouseActiveTimeout = 0;
+
+        const drawFrame = (now: number) => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (!stateRef.current.ready) return;
 
-            const { particles, mouse } = stateRef.current;
+            const { particles } = stateRef.current;
             ctx.fillStyle = '#000000';
 
             for (const p of particles) {
-                if (now < p.spawnAt) continue; // still waiting
+                if (now < p.spawnAt) continue;
 
                 p.alpha = Math.min(p.alpha + 0.06, 1);
 
                 if (!p.done) {
-                    // Bezier progress 0→1 — ALWAYS reaches 1, so logo ALWAYS fills
                     const t = Math.min((now - p.spawnAt) / DURATION, 1);
-                    // Smooth ease-in-out
                     const te = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
-
-                    // Core bezier position
                     const bx = qbez(p.sx, p.cx, p.homeX, te);
                     const by = qbez(p.sy, p.cy, p.homeY, te);
-
-                    // Lateral river-current oscillation (fades out as particle arrives)
                     const fadeOut = 1 - te;
                     const wave = Math.sin(now * p.waveFreq + p.wavePhase) * p.waveMag * fadeOut;
-                    // Perpendicular to bezier tangent direction
                     const dtx = p.homeX - p.sx; const dty = p.homeY - p.sy;
                     const dl = Math.hypot(dtx, dty) || 1;
                     p.x = bx + (-dty / dl) * wave;
                     p.y = by + (dtx / dl) * wave;
-
-                    if (t >= 1) {
-                        p.x = p.homeX; p.y = p.homeY;
-                        p.done = true;
-                        p.arrivedAt = now;
-                    }
+                    if (t >= 1) { p.x = p.homeX; p.y = p.homeY; p.done = true; p.arrivedAt = now; }
                 } else {
-                    // Arrived — stay at home position
                     p.x = p.homeX;
                     p.y = p.homeY;
                 }
@@ -227,12 +216,49 @@ const GrainLogo: React.FC<GrainLogoProps> = ({ className }) => {
             ctx.globalAlpha = 1;
         };
 
+        const render = (now: number) => {
+            drawFrame(now);
+            // Stop the loop once all particles have settled
+            const allDone = stateRef.current.ready &&
+                stateRef.current.particles.every(p => p.done && p.alpha >= 1);
+            if (allDone) {
+                stateRef.current.animId = 0;
+                return; // rAF stops — static canvas from here
+            }
+            stateRef.current.animId = requestAnimationFrame(render);
+        };
+
+        // Mouse tracking restarts the loop briefly for interactive effect
+        const restartLoop = () => {
+            if (isTouch) return; // no mouse on touch devices
+            if (!stateRef.current.animId) {
+                const loop = (now: number) => {
+                    drawFrame(now);
+                    stateRef.current.animId = requestAnimationFrame(loop);
+                };
+                stateRef.current.animId = requestAnimationFrame(loop);
+            }
+            clearTimeout(mouseActiveTimeout);
+            mouseActiveTimeout = window.setTimeout(() => {
+                cancelAnimationFrame(stateRef.current.animId);
+                stateRef.current.animId = 0;
+                // Render one last static frame
+                drawFrame(performance.now());
+            }, 300) as unknown as number;
+        };
+
+        const origMouseMove = onMouseMove;
+        window.removeEventListener('mousemove', onMouseMove);
+        const mouseMovePlus = (e: MouseEvent) => { origMouseMove(e); restartLoop(); };
+        window.addEventListener('mousemove', mouseMovePlus);
+
         stateRef.current.animId = requestAnimationFrame(render);
 
         return () => {
             cancelAnimationFrame(stateRef.current.animId);
+            clearTimeout(mouseActiveTimeout);
             window.removeEventListener('resize', resize);
-            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mousemove', mouseMovePlus);
             canvas.removeEventListener('mouseleave', onMouseLeave);
             canvas.removeEventListener('touchmove', onTouchMove);
         };

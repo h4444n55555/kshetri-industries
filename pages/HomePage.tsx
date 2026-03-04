@@ -273,6 +273,7 @@ const HomePage: React.FC = () => {
 
   /* ── Animation loop — reads scroll position every frame ── */
   useEffect(() => {
+    if (navigator.maxTouchPoints > 0) return; // touch devices use MobileFounders — no rAF needed
     const tick = () => {
       if (foundersInView.current) {
         const el = foundersRef.current;

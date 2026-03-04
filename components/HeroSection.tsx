@@ -65,6 +65,8 @@ const HeroSection: React.FC = () => {
         };
     }, [logoFormed]);
 
+    const isTouch = typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0;
+
     return (
         <section
             className="relative w-full bg-background-light overflow-hidden"
@@ -74,7 +76,7 @@ const HeroSection: React.FC = () => {
             <div className="absolute inset-0 z-0">
                 <ShadowOverlay
                     color="rgba(140, 155, 180, 0.7)"
-                    animation={{ scale: 40, speed: 15 }}
+                    animation={isTouch ? undefined : { scale: 40, speed: 15 }}
                     noise={{ opacity: 0.15, scale: 1.5 }}
                 />
             </div>
