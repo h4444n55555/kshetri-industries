@@ -60,12 +60,20 @@ const StorytellingSection: React.FC = () => {
 
   const rafId = useRef(0);
   const inView = useRef(false);
-  const progressRef = useRef(0);
-  const snapTimer = useRef<NodeJS.Timeout | null>(null);
-  const isSnapping = useRef(false);
+  /* Lerp state — mirrors founders section for identical smoothness */
+  const targetProgress = useRef(0);
+  const currentProgressRef = useRef(0);
+  const lastRaw = useRef(0);
+  const stableFrames = useRef(0);
+  const isSnapped = useRef(false);
 
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
+
+  /* Evenly-spaced snap keyframes for 4 panels */
+  const KEYFRAMES = [0, 1 / (NUM_PANELS - 1), 2 / (NUM_PANELS - 1), 1];
+  const nearestKeyframe = useCallback((v: number) =>
+    KEYFRAMES.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a)), []);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 1280);
@@ -115,36 +123,10 @@ const StorytellingSection: React.FC = () => {
     }
   }, []);
 
-  const snapToNearest = useCallback(() => {
-    if (isSnapping.current || !containerRef.current) return;
-    const el = containerRef.current;
-    const scrollable = el.offsetHeight - window.innerHeight;
-    if (scrollable <= 0) return;
-    const wrapperTop = el.offsetTop;
-    const currentScroll = window.scrollY - wrapperTop;
-    const activeScrollable = el.offsetHeight - window.innerHeight * 1.4;
-    if (currentScroll < 0 || currentScroll > activeScrollable + window.innerHeight * 0.5) return;
-    const prog = clamp(currentScroll / scrollable);
-    let nearest = 0, nearestDist = Infinity;
-    for (let i = 0; i < NUM_PANELS; i++) {
-      const d = Math.abs(prog - i / (NUM_PANELS - 1));
-      if (d < nearestDist) { nearestDist = d; nearest = i; }
-    }
-    const targetY = wrapperTop + (nearest / (NUM_PANELS - 1)) * scrollable;
-    if (Math.abs(window.scrollY - targetY) > 5) {
-      isSnapping.current = true;
-      window.scrollTo({ top: targetY, behavior: 'smooth' });
-      setTimeout(() => { isSnapping.current = false; }, 800);
-    }
-  }, []);
+  const snapToNearest = useCallback(() => {}, []); // unused — kept for dep-list safety
 
   useEffect(() => {
     if (isMobile) return;
-
-    const onScroll = () => {
-      if (snapTimer.current) clearTimeout(snapTimer.current);
-      snapTimer.current = setTimeout(snapToNearest, 180);
-    };
 
     const tick = () => {
       if (inView.current && containerRef.current) {
@@ -152,15 +134,42 @@ const StorytellingSection: React.FC = () => {
         const scrollable = el.offsetHeight - window.innerHeight;
         if (scrollable > 0) {
           const raw = clamp((window.scrollY - el.offsetTop) / scrollable);
-          progressRef.current = raw;
-          updateDOM(raw);
+          const scrollDelta = raw - lastRaw.current;
+
+          if (isSnapped.current) {
+            const snappedAt = targetProgress.current;
+            const crossedForward = scrollDelta > 0 && raw > snappedAt + 0.015;
+            const crossedBackward = scrollDelta < 0 && raw < snappedAt - 0.015;
+            if (crossedForward || crossedBackward) {
+              isSnapped.current = false;
+              stableFrames.current = 0;
+              targetProgress.current = raw;
+            }
+          } else if (Math.abs(scrollDelta) > 0.003) {
+            targetProgress.current = raw;
+            stableFrames.current = 0;
+          } else {
+            stableFrames.current++;
+            if (stableFrames.current >= 6) {
+              targetProgress.current = nearestKeyframe(raw);
+              isSnapped.current = true;
+            }
+          }
+
+          lastRaw.current = raw;
         }
       }
+
+      /* Lerp toward target — same 0.15 easing as founders section */
+      const diff = targetProgress.current - currentProgressRef.current;
+      if (Math.abs(diff) > 0.0003) {
+        currentProgressRef.current += diff * 0.15;
+        updateDOM(currentProgressRef.current);
+      }
+
       rafId.current = requestAnimationFrame(tick);
     };
     rafId.current = requestAnimationFrame(tick);
-
-    window.addEventListener('scroll', onScroll, { passive: true });
 
     const observer = new IntersectionObserver(
       ([entry]) => { inView.current = entry.isIntersecting; },
@@ -168,16 +177,13 @@ const StorytellingSection: React.FC = () => {
     );
     if (containerRef.current) observer.observe(containerRef.current);
 
-    // Initial paint
     updateDOM(0);
 
     return () => {
       cancelAnimationFrame(rafId.current);
-      window.removeEventListener('scroll', onScroll);
       observer.disconnect();
-      if (snapTimer.current) clearTimeout(snapTimer.current);
     };
-  }, [isMobile, updateDOM, snapToNearest]);
+  }, [isMobile, updateDOM, nearestKeyframe]);
 
   /* ─── MOBILE: Swipeable horizontal carousel ─── */
   if (isMobile) {
