@@ -127,7 +127,7 @@ const StorytellingSection: React.FC = () => {
   const snapToNearest = useCallback(() => {}, []); // unused — kept for dep-list safety
 
   useEffect(() => {
-    if (isMobile || isWideTouch) return;
+    if (isMobile) return;
 
     const tick = () => {
       if (inView.current && containerRef.current) {
