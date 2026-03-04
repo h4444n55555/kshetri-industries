@@ -249,7 +249,7 @@ const HomePage: React.FC = () => {
   const SCROLL_VH = 1000;
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1280 || window.matchMedia('(pointer: coarse)').matches);
+    const check = () => setIsMobile(window.innerWidth < 1280 || navigator.maxTouchPoints > 0);
     check();
     window.addEventListener('resize', check, { passive: true });
     return () => window.removeEventListener('resize', check);

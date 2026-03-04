@@ -76,7 +76,7 @@ const StorytellingSection: React.FC = () => {
     KEYFRAMES.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a)), []);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1280 || window.matchMedia('(pointer: coarse)').matches);
+    const check = () => setIsMobile(window.innerWidth < 1280 || navigator.maxTouchPoints > 0);
     check();
     window.addEventListener('resize', check, { passive: true });
     return () => window.removeEventListener('resize', check);
