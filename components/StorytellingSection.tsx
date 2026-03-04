@@ -54,15 +54,16 @@ const StorytellingSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const rafId = useRef(0);
+  const inView = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
   const isSnapping = useRef(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
+    const check = () => setIsMobile(window.innerWidth < 1024);
     check();
-    window.addEventListener('resize', check);
+    window.addEventListener('resize', check, { passive: true });
     return () => window.removeEventListener('resize', check);
   }, []);
 
@@ -122,23 +123,32 @@ const StorytellingSection: React.FC = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     const tick = () => {
-      const el = containerRef.current;
-      if (el) {
-        const rect = el.getBoundingClientRect();
-        const wrapperTop = rect.top + window.scrollY;
-        const scrollable = el.offsetHeight - window.innerHeight;
-        if (scrollable > 0) {
-          const raw = clamp((window.scrollY - wrapperTop) / scrollable);
-          setProgress(raw);
+      if (inView.current) {
+        const el = containerRef.current;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const wrapperTop = rect.top + window.scrollY;
+          const scrollable = el.offsetHeight - window.innerHeight;
+          if (scrollable > 0) {
+            const raw = clamp((window.scrollY - wrapperTop) / scrollable);
+            setProgress(raw);
+          }
         }
       }
       rafId.current = requestAnimationFrame(tick);
     };
     rafId.current = requestAnimationFrame(tick);
-    
+
+    const observer = new IntersectionObserver(
+      ([entry]) => { inView.current = entry.isIntersecting; },
+      { threshold: 0 }
+    );
+    if (containerRef.current) observer.observe(containerRef.current);
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       cancelAnimationFrame(rafId.current);
+      observer.disconnect();
       if (scrollTimeout.current) {
         clearTimeout(scrollTimeout.current);
       }

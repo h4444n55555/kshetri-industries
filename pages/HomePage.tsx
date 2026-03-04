@@ -249,9 +249,9 @@ const HomePage: React.FC = () => {
   const SCROLL_VH = 1000;
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
+    const check = () => setIsMobile(window.innerWidth < 1024);
     check();
-    window.addEventListener('resize', check);
+    window.addEventListener('resize', check, { passive: true });
     return () => window.removeEventListener('resize', check);
   }, []);
 
@@ -263,6 +263,7 @@ const HomePage: React.FC = () => {
   const lastRaw = useRef(0);
   const stableFrames = useRef(0);
   const isSnapped = useRef(false);
+  const foundersInView = useRef(false);
 
   /* Keyframe positions — clean resting points */
   const KEYFRAMES = [0, 0.12, 0.33, 0.44, 0.55, 0.74, 0.88, 1.0];
@@ -273,52 +274,60 @@ const HomePage: React.FC = () => {
   /* ── Animation loop — reads scroll position every frame ── */
   useEffect(() => {
     const tick = () => {
-      const el = foundersRef.current;
-      if (el) {
-        const rect = el.getBoundingClientRect();
-        const wrapperTop = rect.top + window.scrollY;
-        const scrollable = el.offsetHeight - window.innerHeight;
-        if (scrollable > 0) {
-          const raw = clamp((window.scrollY - wrapperTop) / scrollable);
-          const scrollDelta = raw - lastRaw.current;
+      if (foundersInView.current) {
+        const el = foundersRef.current;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const wrapperTop = rect.top + window.scrollY;
+          const scrollable = el.offsetHeight - window.innerHeight;
+          if (scrollable > 0) {
+            const raw = clamp((window.scrollY - wrapperTop) / scrollable);
+            const scrollDelta = raw - lastRaw.current;
 
-          if (isSnapped.current) {
-            const snappedAt = targetProgress.current;
-            // Only unsnap when raw crosses past the snap point in direction of travel
-            const crossedForward = scrollDelta > 0 && raw > snappedAt + 0.015;
-            const crossedBackward = scrollDelta < 0 && raw < snappedAt - 0.015;
-            if (crossedForward || crossedBackward) {
-              isSnapped.current = false;
-              stableFrames.current = 0;
+            if (isSnapped.current) {
+              const snappedAt = targetProgress.current;
+              const crossedForward = scrollDelta > 0 && raw > snappedAt + 0.015;
+              const crossedBackward = scrollDelta < 0 && raw < snappedAt - 0.015;
+              if (crossedForward || crossedBackward) {
+                isSnapped.current = false;
+                stableFrames.current = 0;
+                targetProgress.current = raw;
+              }
+            } else if (Math.abs(scrollDelta) > 0.003) {
               targetProgress.current = raw;
+              stableFrames.current = 0;
+            } else {
+              stableFrames.current++;
+              if (stableFrames.current >= 6) {
+                targetProgress.current = nearestKeyframe(raw);
+                isSnapped.current = true;
+              }
             }
-            // While waiting to cross: keep target at snap, do nothing
-          } else if (Math.abs(scrollDelta) > 0.003) {
-            // Actively scrolling — follow raw
-            targetProgress.current = raw;
-            stableFrames.current = 0;
-          } else {
-            // Scroll stopped — count stable frames then snap
-            stableFrames.current++;
-            if (stableFrames.current >= 6) {
-              targetProgress.current = nearestKeyframe(raw);
-              isSnapped.current = true;
-            }
+
+            lastRaw.current = raw;
           }
-
-          lastRaw.current = raw;
         }
-      }
 
-      const diff = targetProgress.current - currentProgress.current;
-      if (Math.abs(diff) > 0.0005) {
-        currentProgress.current += diff * 0.15;
-        setProgress(currentProgress.current);
+        const diff = targetProgress.current - currentProgress.current;
+        if (Math.abs(diff) > 0.0005) {
+          currentProgress.current += diff * 0.15;
+          setProgress(currentProgress.current);
+        }
       }
       animFrameId.current = requestAnimationFrame(tick);
     };
     animFrameId.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(animFrameId.current);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => { foundersInView.current = entry.isIntersecting; },
+      { threshold: 0 }
+    );
+    if (foundersRef.current) observer.observe(foundersRef.current);
+
+    return () => {
+      cancelAnimationFrame(animFrameId.current);
+      observer.disconnect();
+    };
   }, []);
 
   /* ═══════════════════════════════════════════════════════════
