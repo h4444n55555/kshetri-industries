@@ -26,7 +26,7 @@ const FOUNDER = {
   bio: [
     { icon: 'business_center', text: 'Founded Kshetri Industries Pvt. Ltd. in 2025 as a structured evolution of six years of hands-on experience in the food and beverage sector.' },
     { icon: 'school', text: 'Holds a Bachelor of Fine Arts (BFA) — approaching product development with creativity and precision.' },
-    { icon: 'eco', text: 'Focused on value-added and functional beverages developed from indigenous agricultural resources of Northeast India.' },
+    { icon: 'eco', text: 'Focused on value-added products developed from indigenous agricultural resources of Northeast India.' },
   ],
 };
 
@@ -181,7 +181,7 @@ const MobileFounders: React.FC = () => {
       <div style={{ opacity: activeIdx === 3 ? 1 : 0, transform: activeIdx === 3 ? 'translateX(0)' : 'translateX(20px)', transition: 'opacity 0.5s ease-out 0.1s, transform 0.5s ease-out 0.1s' }}>
         <h2 className="text-2xl font-black tracking-tight leading-[1.12] mb-3 text-center" style={{ color: '#F1F5F9' }}>
           Together, we're building the next generation of{' '}
-          <span style={{ color: '#A78BFA', fontStyle: 'italic' }}>functional beverages.</span>
+          <span style={{ color: '#A78BFA', fontStyle: 'italic' }}>value-added products.</span>
         </h2>
         <p className="text-sm font-medium leading-relaxed text-center mb-8" style={{ color: '#64748B' }}>Rooted in Northeast India. Designed for global scale.</p>
         <div className="flex justify-center gap-5">
@@ -683,7 +683,7 @@ const HomePage: React.FC = () => {
                 <div className="flex-1 flex flex-col justify-center text-center md:text-left min-w-0">
                   <h2 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight leading-[1.12] mb-4" style={{ color: '#F1F5F9' }}>
                     Together, we're building<br className="hidden md:block" /> the next generation of{' '}
-                    <span style={{ color: '#A78BFA', fontStyle: 'italic' }}>functional beverages.</span>
+                    <span style={{ color: '#A78BFA', fontStyle: 'italic' }}>value-added products.</span>
                   </h2>
                   <p className="text-sm md:text-[15px] font-medium leading-relaxed max-w-md" style={{ color: '#64748B' }}>
                     Rooted in Northeast India.&nbsp; Designed for global scale.
