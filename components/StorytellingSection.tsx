@@ -67,7 +67,11 @@ const StorytellingSection: React.FC = () => {
   const stableFrames = useRef(0);
   const isSnapped = useRef(false);
 
+  /* isMobile  = phone/small touch → swipe carousel
+     isWideTouch = iPad/large touch → static layout
+     neither    = real desktop      → scroll animation */
   const [isMobile, setIsMobile] = useState(false);
+  const [isWideTouch, setIsWideTouch] = useState(false);
   const navigate = useNavigate();
 
   /* Evenly-spaced snap keyframes for 4 panels */
@@ -76,7 +80,12 @@ const StorytellingSection: React.FC = () => {
     KEYFRAMES.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a)), []);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1280 || navigator.maxTouchPoints > 0);
+    const check = () => {
+      const touch = navigator.maxTouchPoints > 0;
+      const wide = window.innerWidth >= 900;
+      setIsMobile(touch && !wide);
+      setIsWideTouch(touch && wide);
+    };
     check();
     window.addEventListener('resize', check, { passive: true });
     return () => window.removeEventListener('resize', check);
@@ -126,7 +135,7 @@ const StorytellingSection: React.FC = () => {
   const snapToNearest = useCallback(() => {}, []); // unused — kept for dep-list safety
 
   useEffect(() => {
-    if (isMobile) return;
+    if (isMobile || isWideTouch) return;
 
     const tick = () => {
       if (inView.current && containerRef.current) {
@@ -183,11 +192,55 @@ const StorytellingSection: React.FC = () => {
       cancelAnimationFrame(rafId.current);
       observer.disconnect();
     };
-  }, [isMobile, updateDOM, nearestKeyframe]);
+  }, [isMobile, isWideTouch, updateDOM, nearestKeyframe]);
 
   /* ─── MOBILE: Swipeable horizontal carousel ─── */
   if (isMobile) {
     return <MobileCarousel navigate={navigate} />;
+  }
+
+  /* ─── WIDE TOUCH (iPad desktop mode): Static vertical layout ─── */
+  if (isWideTouch) {
+    return (
+      <section id="about" className="bg-background-light py-16 px-6 md:px-12 space-y-0">
+        {PANELS.map((panel, idx) => {
+          const hasImage = !!panel.image;
+          if (!hasImage) {
+            return (
+              <div key={idx} className="py-16 flex items-center justify-center text-center">
+                <div className="max-w-2xl">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.35em] mb-4" style={{ color: '#7B4B11' }}>{panel.tag}</p>
+                  <h2 className="text-4xl font-black tracking-tight leading-[1.05] mb-5" style={{ color: '#2B052E' }}>{panel.title}</h2>
+                  <p className="text-base font-medium leading-relaxed" style={{ color: '#6B5E5E' }}>{panel.body}</p>
+                </div>
+              </div>
+            );
+          }
+          return (
+            <div key={idx} className="flex flex-row items-stretch" style={{ minHeight: '60vw', maxHeight: '520px' }}>
+              {/* Text left */}
+              <div className="w-1/2 flex items-center justify-end pr-10 pl-4 py-10">
+                <div className="max-w-md">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.35em] mb-4" style={{ color: '#7B4B11' }}>{panel.tag}</p>
+                  <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-[1.08] mb-4" style={{ color: '#2B052E' }}>{panel.title}</h2>
+                  <p className="text-base font-medium leading-relaxed mb-6" style={{ color: '#6B5E5E' }}>{panel.body}</p>
+                  {(idx === 2 || idx === 3) && (
+                    <button
+                      onClick={() => navigate(idx === 2 ? '/products#cha-bon' : '/products#rice-paper')}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-full shadow-lg text-sm uppercase tracking-widest"
+                    >View Product</button>
+                  )}
+                </div>
+              </div>
+              {/* Image right */}
+              <div className="w-1/2 relative overflow-hidden" style={{ background: '#E8E0D8' }}>
+                <img src={panel.image} alt={panel.imageAlt || ''} className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: 'top center' }} />
+              </div>
+            </div>
+          );
+        })}
+      </section>
+    );
   }
 
   /* ─── DESKTOP: Horizontal scroll — all animation via direct DOM refs ─── */
