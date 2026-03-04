@@ -1,6 +1,6 @@
 [build]
-  publish = "static-site"
-  command = ""
+  command = "npm run build"
+  publish = "dist"
 
 [context.production.environment]
 # Add any environment variables needed for your site here
