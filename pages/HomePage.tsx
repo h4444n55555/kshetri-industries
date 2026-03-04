@@ -58,7 +58,30 @@ const MobileFounders: React.FC = () => {
   const touchStartX = React.useRef<number | null>(null);
   const touchStartY = React.useRef<number | null>(null);
   const isHorizontal = React.useRef<boolean | null>(null);
+  const sectionRef = React.useRef<HTMLElement>(null);
+  const activeIdxRef = React.useRef(0);
   const NUM_SLIDES = 4;
+
+  React.useEffect(() => { activeIdxRef.current = activeIdx; }, [activeIdx]);
+
+  React.useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    let sx = 0, sy = 0;
+    const onStart = (e: TouchEvent) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; };
+    const onMove = (e: TouchEvent) => {
+      const dx = e.touches[0].clientX - sx;
+      const dy = e.touches[0].clientY - sy;
+      if (Math.abs(dx) >= Math.abs(dy)) { e.preventDefault(); return; }
+      const idx = activeIdxRef.current;
+      if (dy > 0 && idx === 0) return;
+      if (dy < 0 && idx === NUM_SLIDES - 1) return;
+      e.preventDefault();
+    };
+    el.addEventListener('touchstart', onStart, { passive: true });
+    el.addEventListener('touchmove', onMove, { passive: false });
+    return () => { el.removeEventListener('touchstart', onStart); el.removeEventListener('touchmove', onMove); };
+  }, []);
 
   const imgFallback = (url: string) => (e: React.SyntheticEvent<HTMLImageElement>) => {
     (e.currentTarget as HTMLImageElement).src = url;
@@ -208,6 +231,7 @@ const MobileFounders: React.FC = () => {
 
   return (
     <section
+      ref={sectionRef}
       className="relative overflow-hidden bg-background-light"
       style={{ height: '100svh' }}
       onTouchStart={handleTouchStart}
