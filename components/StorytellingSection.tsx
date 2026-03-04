@@ -366,11 +366,8 @@ const MobileCarousel: React.FC<{ navigate: ReturnType<typeof useNavigate> }> = (
     const onMove = (e: TouchEvent) => {
       const dx = e.touches[0].clientX - sx;
       const dy = e.touches[0].clientY - sy;
-      if (Math.abs(dx) >= Math.abs(dy)) { e.preventDefault(); return; }
-      const idx = activeIdxRef.current;
-      if (dy > 0 && idx === 0) return;
-      if (dy < 0 && idx === NUM_PANELS - 1) return;
-      e.preventDefault();
+      // Only block horizontal swipes (for carousel drag); always allow vertical page scroll
+      if (Math.abs(dx) > Math.abs(dy)) { e.preventDefault(); }
     };
     el.addEventListener('touchstart', onStart, { passive: true });
     el.addEventListener('touchmove', onMove, { passive: false });
