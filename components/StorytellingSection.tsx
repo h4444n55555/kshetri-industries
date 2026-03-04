@@ -52,13 +52,20 @@ const clamp = (v: number, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
 
 const StorytellingSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const dotsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const scrollHintRef = useRef<HTMLDivElement>(null);
+  const panelTextRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const panelImgRefs = useRef<(HTMLImageElement | null)[]>([]);
+
   const rafId = useRef(0);
   const inView = useRef(false);
+  const progressRef = useRef(0);
+  const snapTimer = useRef<NodeJS.Timeout | null>(null);
+  const isSnapping = useRef(false);
+
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
-  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-  const isSnapping = useRef(false);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 1024);
@@ -67,77 +74,93 @@ const StorytellingSection: React.FC = () => {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  /* Snap to nearest panel on scroll end */
-  const snapToNearestPanel = useCallback(() => {
-    if (isSnapping.current || !containerRef.current) return;
+  /* Direct DOM update — called every rAF tick, zero React re-renders */
+  const updateDOM = useCallback((progress: number) => {
+    const translateX = progress * (NUM_PANELS - 1) * 100;
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translate3d(-${translateX}vw, 0, 0)`;
+    }
 
-    const el = containerRef.current;
-    const rect = el.getBoundingClientRect();
-    const wrapperTop = rect.top + window.scrollY;
-    // scrollable = the range over which progress goes 0→1
-    const scrollable = el.offsetHeight - window.innerHeight;
-    if (scrollable <= 0) return;
+    for (let idx = 0; idx < NUM_PANELS; idx++) {
+      const panelCenter = idx / (NUM_PANELS - 1);
+      const distance = Math.abs(progress - panelCenter);
+      const halfWidth = (1 / (NUM_PANELS - 1)) * 0.6;
+      const visibility = clamp(1 - distance / halfWidth);
+      const imageLeft = PANELS[idx].imagePosition === 'left';
+      const parallax = (1 - visibility) * (imageLeft ? -4 : 4);
+      const textFade = clamp(visibility * 1.8);
+      const textShift = (1 - clamp(visibility * 1.5)) * 40;
 
-    const currentScroll = window.scrollY - wrapperTop;
-    // Only snap when inside the active scroll zone (not the relaxation tail)
-    const activeScrollable = (el.offsetHeight - window.innerHeight * 1.4);
-    if (currentScroll < 0 || currentScroll > activeScrollable + window.innerHeight * 0.5) return;
+      const textEl = panelTextRefs.current[idx];
+      if (textEl) {
+        textEl.style.opacity = String(textFade);
+        textEl.style.transform = `translateX(${imageLeft ? textShift : -textShift}px)`;
+      }
 
-    const currentProgress = clamp(currentScroll / scrollable);
+      const imgEl = panelImgRefs.current[idx];
+      if (imgEl) {
+        imgEl.style.transform = `translate3d(${parallax}%, 0, 0) scale(1.05)`;
+      }
 
-    // Each panel is centered at progress = i / (NUM_PANELS - 1)
-    let nearestPanel = 0;
-    let nearestDist = Infinity;
-    for (let i = 0; i < NUM_PANELS; i++) {
-      const panelProgress = i / (NUM_PANELS - 1);
-      const dist = Math.abs(currentProgress - panelProgress);
-      if (dist < nearestDist) {
-        nearestDist = dist;
-        nearestPanel = i;
+      const dot = dotsRef.current[idx];
+      if (dot) {
+        const active = Math.abs(progress - panelCenter) < (1 / (NUM_PANELS - 1)) * 0.55;
+        dot.style.width = active ? '28px' : '8px';
+        dot.style.background = active ? '#2B052E' : '#2B052E30';
       }
     }
 
-    const targetProgress = nearestPanel / (NUM_PANELS - 1);
-    const targetScrollY = wrapperTop + targetProgress * scrollable;
-
-    if (Math.abs(window.scrollY - targetScrollY) > 5) {
-      isSnapping.current = true;
-      window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
-      setTimeout(() => { isSnapping.current = false; }, 700);
+    if (scrollHintRef.current) {
+      scrollHintRef.current.style.opacity = progress < 0.04 ? '1' : '0';
     }
   }, []);
 
-  /* Smooth scroll tracking for animations + snap on scroll end */
+  const snapToNearest = useCallback(() => {
+    if (isSnapping.current || !containerRef.current) return;
+    const el = containerRef.current;
+    const scrollable = el.offsetHeight - window.innerHeight;
+    if (scrollable <= 0) return;
+    const wrapperTop = el.offsetTop;
+    const currentScroll = window.scrollY - wrapperTop;
+    const activeScrollable = el.offsetHeight - window.innerHeight * 1.4;
+    if (currentScroll < 0 || currentScroll > activeScrollable + window.innerHeight * 0.5) return;
+    const prog = clamp(currentScroll / scrollable);
+    let nearest = 0, nearestDist = Infinity;
+    for (let i = 0; i < NUM_PANELS; i++) {
+      const d = Math.abs(prog - i / (NUM_PANELS - 1));
+      if (d < nearestDist) { nearestDist = d; nearest = i; }
+    }
+    const targetY = wrapperTop + (nearest / (NUM_PANELS - 1)) * scrollable;
+    if (Math.abs(window.scrollY - targetY) > 5) {
+      isSnapping.current = true;
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
+      setTimeout(() => { isSnapping.current = false; }, 800);
+    }
+  }, []);
+
   useEffect(() => {
-    const handleScroll = () => {
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current);
-      }
-      scrollTimeout.current = setTimeout(() => {
-        if (!isMobile) {
-          snapToNearestPanel();
-        }
-      }, 150);
+    if (isMobile) return;
+
+    const onScroll = () => {
+      if (snapTimer.current) clearTimeout(snapTimer.current);
+      snapTimer.current = setTimeout(snapToNearest, 180);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
     const tick = () => {
-      if (inView.current) {
+      if (inView.current && containerRef.current) {
         const el = containerRef.current;
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          const wrapperTop = rect.top + window.scrollY;
-          const scrollable = el.offsetHeight - window.innerHeight;
-          if (scrollable > 0) {
-            const raw = clamp((window.scrollY - wrapperTop) / scrollable);
-            setProgress(raw);
-          }
+        const scrollable = el.offsetHeight - window.innerHeight;
+        if (scrollable > 0) {
+          const raw = clamp((window.scrollY - el.offsetTop) / scrollable);
+          progressRef.current = raw;
+          updateDOM(raw);
         }
       }
       rafId.current = requestAnimationFrame(tick);
     };
     rafId.current = requestAnimationFrame(tick);
+
+    window.addEventListener('scroll', onScroll, { passive: true });
 
     const observer = new IntersectionObserver(
       ([entry]) => { inView.current = entry.isIntersecting; },
@@ -145,102 +168,71 @@ const StorytellingSection: React.FC = () => {
     );
     if (containerRef.current) observer.observe(containerRef.current);
 
+    // Initial paint
+    updateDOM(0);
+
     return () => {
-      window.removeEventListener('scroll', handleScroll);
       cancelAnimationFrame(rafId.current);
+      window.removeEventListener('scroll', onScroll);
       observer.disconnect();
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current);
-      }
+      if (snapTimer.current) clearTimeout(snapTimer.current);
     };
-  }, [isMobile, snapToNearestPanel]);
-
-  /* Per-panel visibility (0–1) for fade animations */
-  const panelVisibility = useCallback(
-    (idx: number) => {
-      const panelCenter = idx / (NUM_PANELS - 1);
-      const distance = Math.abs(progress - panelCenter);
-      const halfWidth = 1 / (NUM_PANELS - 1) * 0.6;
-      return clamp(1 - distance / halfWidth);
-    },
-    [progress],
-  );
-
-  const translateX = progress * (NUM_PANELS - 1) * 100;
+  }, [isMobile, updateDOM, snapToNearest]);
 
   /* ─── MOBILE: Swipeable horizontal carousel ─── */
   if (isMobile) {
-    return (
-      <MobileCarousel navigate={navigate} />
-    );
+    return <MobileCarousel navigate={navigate} />;
   }
 
-  /* ─── DESKTOP: Horizontal scroll ─── */
+  /* ─── DESKTOP: Horizontal scroll — all animation via direct DOM refs ─── */
   return (
     <div
       id="about"
       ref={containerRef}
-      className="relative scroll-mt-20"
+      className="relative"
       style={{ height: `${(NUM_PANELS + 0.4) * 100}vh` }}
     >
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-background-light">
         {/* Horizontal track */}
         <div
+          ref={trackRef}
           className="flex h-full will-change-transform"
-          style={{
-            width: `${NUM_PANELS * 100}vw`,
-            transform: `translate3d(-${translateX}vw, 0, 0)`,
-            transition: 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          }}
+          style={{ width: `${NUM_PANELS * 100}vw` }}
         >
           {PANELS.map((panel, idx) => (
             <DesktopPanel
               key={idx}
               panel={panel}
               index={idx}
-              visibility={panelVisibility(idx)}
               navigate={navigate}
+              textRef={(el) => { panelTextRefs.current[idx] = el; }}
+              imgRef={(el) => { panelImgRefs.current[idx] = el; }}
             />
           ))}
         </div>
 
         {/* Progress dots */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
-          {PANELS.map((_, idx) => {
-            const panelCenter = idx / (NUM_PANELS - 1);
-            const dist = Math.abs(progress - panelCenter);
-            const active = dist < 1 / (NUM_PANELS - 1) * 0.55;
-            return (
-              <div
-                key={idx}
-                className="transition-all duration-500 rounded-full"
-                style={{
-                  width: active ? 28 : 8,
-                  height: 8,
-                  background: active ? '#2B052E' : '#2B052E30',
-                }}
-              />
-            );
-          })}
+          {PANELS.map((_, idx) => (
+            <div
+              key={idx}
+              ref={(el) => { dotsRef.current[idx] = el; }}
+              className="rounded-full"
+              style={{ width: 8, height: 8, background: '#2B052E30', transition: 'width 0.4s ease, background 0.4s ease' }}
+            />
+          ))}
         </div>
 
-        {/* Scroll hint on first panel */}
+        {/* Scroll hint */}
         <div
-          className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-20 transition-opacity duration-700"
-          style={{ opacity: progress < 0.04 ? 1 : 0, pointerEvents: 'none' }}
+          ref={scrollHintRef}
+          className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-20 pointer-events-none"
+          style={{ transition: 'opacity 0.7s ease' }}
         >
-          <span
-            className="text-[10px] uppercase tracking-[0.25em] font-bold"
-            style={{ color: '#6B5E5E80' }}
-          >
+          <span className="text-[10px] uppercase tracking-[0.25em] font-bold" style={{ color: '#6B5E5E80' }}>
             Scroll to explore
           </span>
-          <div
-            className="w-px h-8"
-            style={{
-              background: 'linear-gradient(to bottom, #6B5E5E50, transparent)',
-            }}
-          />
+          <div className="w-px h-8" style={{ background: 'linear-gradient(to bottom, #6B5E5E50, transparent)' }} />
         </div>
       </div>
     </div>
@@ -253,49 +245,31 @@ const StorytellingSection: React.FC = () => {
 interface DesktopPanelProps {
   panel: PanelData;
   index: number;
-  visibility: number;
   navigate: ReturnType<typeof useNavigate>;
+  textRef: (el: HTMLDivElement | null) => void;
+  imgRef: (el: HTMLImageElement | null) => void;
 }
 
-const DesktopPanel: React.FC<DesktopPanelProps> = ({ panel, index, visibility, navigate }) => {
+const DesktopPanel: React.FC<DesktopPanelProps> = ({ panel, index, navigate, textRef, imgRef }) => {
   const hasImage = !!panel.image;
   const imageLeft = panel.imagePosition === 'left';
-
-  /* Subtle parallax: image shifts opposite to scroll */
-  const parallax = (1 - visibility) * (imageLeft ? -4 : 4);
-  const textFade = clamp(visibility * 1.8);
-  const textShift = (1 - clamp(visibility * 1.5)) * 40;
 
   /* ── Full-width intro panel (no image) ── */
   if (!hasImage) {
     return (
-      <div
-        className="flex-shrink-0 w-screen h-full flex items-center justify-center px-12"
-        style={{ background: index === 0 ? '#eef2f6' : '#eef2f6' }}
-      >
+      <div className="flex-shrink-0 w-screen h-full flex items-center justify-center px-12 bg-background-light">
         <div
+          ref={textRef}
           className="max-w-2xl text-center"
-          style={{
-            opacity: textFade,
-            transform: `translateY(${textShift}px)`,
-          }}
+          style={{ opacity: 0 }}
         >
-          <p
-            className="text-[10px] font-bold uppercase tracking-[0.35em] mb-5"
-            style={{ color: '#7B4B11' }}
-          >
+          <p className="text-[10px] font-bold uppercase tracking-[0.35em] mb-5" style={{ color: '#7B4B11' }}>
             {panel.tag}
           </p>
-          <h2
-            className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.05]"
-            style={{ color: '#2B052E' }}
-          >
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.05]" style={{ color: '#2B052E' }}>
             {panel.title}
           </h2>
-          <p
-            className="text-base md:text-lg font-medium leading-relaxed mt-6 max-w-xl mx-auto"
-            style={{ color: '#6B5E5E' }}
-          >
+          <p className="text-base md:text-lg font-medium leading-relaxed mt-6 max-w-xl mx-auto" style={{ color: '#6B5E5E' }}>
             {panel.body}
           </p>
         </div>
@@ -305,21 +279,14 @@ const DesktopPanel: React.FC<DesktopPanelProps> = ({ panel, index, visibility, n
 
   /* ── Split panel: image + text ── */
   const imageBlock = (
-    <div
-      className="w-1/2 h-full relative overflow-hidden flex-shrink-0"
-      style={{ background: '#E8E0D8' }}
-    >
+    <div className="w-1/2 h-full relative overflow-hidden flex-shrink-0" style={{ background: '#E8E0D8' }}>
       <img
+        ref={imgRef}
         src={panel.image}
         alt={panel.imageAlt || ''}
         className="absolute inset-0 w-full h-full object-cover will-change-transform"
-        style={{
-          objectPosition: 'top center',
-          transform: `translate3d(${parallax}%, 0, 0) scale(1.05)`,
-          transition: 'transform 0.1s linear',
-        }}
+        style={{ objectPosition: 'top center', transform: 'translate3d(0%, 0, 0) scale(1.05)' }}
       />
-      {/* Soft gradient overlay where text meets image */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -334,40 +301,22 @@ const DesktopPanel: React.FC<DesktopPanelProps> = ({ panel, index, visibility, n
   const textBlock = (
     <div className={`w-1/2 h-full flex items-center ${imageLeft ? 'justify-end' : 'justify-start'} flex-shrink-0`}>
       <div
+        ref={textRef}
         className={`max-w-lg ${imageLeft ? 'pl-6 lg:pl-8 pr-16 lg:pr-20' : 'pl-16 lg:pl-20 pr-6 lg:pr-8'}`}
-        style={{
-          opacity: textFade,
-          transform: `translateX(${imageLeft ? textShift : -textShift}px)`,
-        }}
+        style={{ opacity: 0 }}
       >
-        <p
-          className="text-xs font-bold uppercase tracking-[0.35em] mb-4"
-          style={{ color: '#7B4B11' }}
-        >
+        <p className="text-xs font-bold uppercase tracking-[0.35em] mb-4" style={{ color: '#7B4B11' }}>
           {panel.tag}
         </p>
-        <h2
-          className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08]"
-          style={{ color: '#2B052E' }}
-        >
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08]" style={{ color: '#2B052E' }}>
           {panel.title}
         </h2>
-        <p
-          className="text-lg font-medium leading-relaxed mt-5"
-          style={{ color: '#6B5E5E' }}
-        >
+        <p className="text-lg font-medium leading-relaxed mt-5" style={{ color: '#6B5E5E' }}>
           {panel.body}
         </p>
-        {/* Product buttons for Cha-bon (index 2) and Rice Paper (index 3) */}
         {(index === 2 || index === 3) && (
           <button
-            onClick={() => {
-              if (index === 2) {
-                navigate('/products#cha-bon');
-              } else {
-                navigate('/products#rice-paper');
-              }
-            }}
+            onClick={() => navigate(index === 2 ? '/products#cha-bon' : '/products#rice-paper')}
             className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-sm uppercase tracking-widest mt-6"
           >
             View Product
@@ -379,17 +328,7 @@ const DesktopPanel: React.FC<DesktopPanelProps> = ({ panel, index, visibility, n
 
   return (
     <div className="flex-shrink-0 w-screen h-full flex">
-      {imageLeft ? (
-        <>
-          {imageBlock}
-          {textBlock}
-        </>
-      ) : (
-        <>
-          {textBlock}
-          {imageBlock}
-        </>
-      )}
+      {imageLeft ? (<>{imageBlock}{textBlock}</>) : (<>{textBlock}{imageBlock}</>)}
     </div>
   );
 };
