@@ -78,7 +78,7 @@ const ProductsPage: React.FC = () => {
     }, [DRINK_COUNT]);
 
     useEffect(() => {
-        const check = () => setIsMobile(window.innerWidth < 1024);
+        const check = () => setIsMobile(window.innerWidth < 1280);
         check();
         window.addEventListener('resize', check, { passive: true });
         return () => window.removeEventListener('resize', check);
