@@ -2,11 +2,14 @@ import React, { useEffect, useRef } from 'react';
 
 interface GrainLogoProps { className?: string; }
 
-const MOUSE_RADIUS = 65;
-const MOUSE_FORCE = 15;
+const MOUSE_RADIUS = 50;
+const MOUSE_FORCE = 4;
 const SPAWN_BAND = 60;   // half-height of the edge launch window
 const MAX_DELAY = 1400; // ms — stagger window
 const DURATION = 2200; // ms — time for each particle to travel its path
+
+// Module-level flag: persists across navigations, resets on page refresh
+let logoHasAnimated = false;
 
 // Quadratic bezier interpolation
 function qbez(p0: number, p1: number, p2: number, t: number) {
@@ -66,7 +69,7 @@ const GrainLogo: React.FC<GrainLogoProps> = ({ className }) => {
             const targetH = Math.round(canvas.height * 0.65);
             const aspect = (img.naturalWidth || img.width) / (img.naturalHeight || img.height);
             const targetW = Math.round(targetH * aspect);
-            const topPad = Math.round(canvas.height * 0.08);
+            const topPad = Math.round(canvas.height * 0.15);
 
             offC.width = targetW; offC.height = targetH;
             offX.fillStyle = '#ffffff';
@@ -99,15 +102,31 @@ const GrainLogo: React.FC<GrainLogoProps> = ({ className }) => {
 
             const now = performance.now();
             const midY = canvas.height / 2;
+            const skipAnim = logoHasAnimated;
             const particles: Particle[] = logoPixels.map((lp) => {
+                if (skipAnim) {
+                    // Already animated before — show logo instantly
+                    return {
+                        sx: lp.x, sy: lp.y,
+                        cx: lp.x, cy: lp.y,
+                        homeX: lp.x, homeY: lp.y,
+                        edgeAlpha: lp.edgeAlpha,
+                        spawnAt: 0,
+                        waveFreq: 0, waveMag: 0, wavePhase: 0,
+                        vx: 0, vy: 0,
+                        x: lp.x, y: lp.y,
+                        alpha: 1,
+                        done: true,
+                        arrivedAt: now,
+                    };
+                }
+
                 const fromLeft = Math.random() < 0.5;
-                // Pure random delay — prevents visible band artifacts from grouped arrivals
                 const delay = Math.random() * MAX_DELAY;
 
                 const sx = fromLeft ? -5 : canvas.width + 5;
                 const sy = midY + (Math.random() - 0.5) * SPAWN_BAND * 2;
 
-                // Control point: midpoint of (start → centroid), jittered slightly
                 const mx = (sx + gcx) / 2 + (Math.random() - 0.5) * 80;
                 const my = (sy + gcy) / 2 + (Math.random() - 0.5) * 80;
 
@@ -128,10 +147,14 @@ const GrainLogo: React.FC<GrainLogoProps> = ({ className }) => {
                 };
             });
 
-            // Shuffle so multi-sine stagger isn't scanline-sequential
-            for (let i = particles.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [particles[i], particles[j]] = [particles[j], particles[i]];
+            if (!skipAnim) {
+                // Shuffle so multi-sine stagger isn't scanline-sequential
+                for (let i = particles.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [particles[i], particles[j]] = [particles[j], particles[i]];
+                }
+                // Mark animation as played after particles finish
+                setTimeout(() => { logoHasAnimated = true; }, MAX_DELAY + DURATION + 200);
             }
 
             stateRef.current.particles = particles;
@@ -192,22 +215,9 @@ const GrainLogo: React.FC<GrainLogoProps> = ({ className }) => {
                         p.arrivedAt = now;
                     }
                 } else {
-                    // Arrived — mouse repulsion + spring home
-                    const mxd = p.x - mouse.x;
-                    const myd = p.y - mouse.y;
-                    const md = Math.hypot(mxd, myd);
-                    if (md < MOUSE_RADIUS && md > 0) {
-                        const ff = 1 - md / MOUSE_RADIUS;
-                        p.vx += (mxd / md) * ff * ff * MOUSE_FORCE;
-                        p.vy += (myd / md) * ff * ff * MOUSE_FORCE;
-                    }
-                    p.vx += (p.homeX - p.x) * 0.2;
-                    p.vy += (p.homeY - p.y) * 0.2;
-                    p.vx *= 0.78; p.vy *= 0.78;
-                    p.x += p.vx; p.y += p.vy;
-                    if (Math.hypot(p.x - p.homeX, p.y - p.homeY) < 0.5) {
-                        p.x = p.homeX; p.y = p.homeY; p.vx = 0; p.vy = 0;
-                    }
+                    // Arrived — stay at home position
+                    p.x = p.homeX;
+                    p.y = p.homeY;
                 }
 
                 ctx.globalAlpha = p.alpha * p.edgeAlpha;

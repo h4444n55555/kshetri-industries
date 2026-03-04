@@ -1,80 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kshetri Industries</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Material Symbols -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              "primary": "#3b82f6",
-              "primary-dark": "#2563eb",
-              "background-light": "#eef2f6", 
-              "slate-800": "#1e293b",
-              "text-main": "#334155",
-              "text-muted": "#64748b"
-            },
-            fontFamily: {
-              "display": ["Work Sans", "sans-serif"],
-              "sans": ["Work Sans", "sans-serif"]
-            },
-            borderRadius: {
-              "DEFAULT": "0.5rem",
-              "xl": "1rem",
-              "2xl": "1.5rem",
-              "3xl": "2.5rem",
-              "4xl": "3rem"
-            },
-             boxShadow: {
-                'clay': '18px 18px 36px #d1d9e6, -18px -18px 36px #ffffff',
-                'clay-lg': '24px 24px 48px #d1d9e6, -24px -24px 48px #ffffff',
-                'clay-md': '12px 12px 24px #d1d9e6, -12px -12px 24px #ffffff',
-                'clay-sm': '8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff',
-                'clay-btn': '9px 9px 18px #d1d9e6, -9px -9px 18px #ffffff',
-                'clay-inset': 'inset 8px 8px 16px #d1d9e6, inset -8px -8px 16px #ffffff',
-                'clay-inset-sm': 'inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff',
-                'glow-primary': '0 0 20px rgba(59, 130, 246, 0.5)',
-            }
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kshetri Industries</title>
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Work+Sans:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#2B052E",
+            "primary-dark": "#4B1640",
+            "accent": "#7B4B11",
+            "background-light": "#eef2f6",
+            "slate-800": "#1e293b",
+            "text-main": "#2B052E",
+            "text-muted": "#6B5E5E"
+          },
+          fontFamily: {
+            "display": ["Work Sans", "sans-serif"],
+            "sans": ["Work Sans", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.5rem",
+            "xl": "1rem",
+            "2xl": "1.5rem",
+            "3xl": "2.5rem",
+            "4xl": "3rem"
+          },
+          boxShadow: {
+            'clay': '0 2px 8px rgba(15,23,42,0.08), 0 4px 20px rgba(15,23,42,0.06)',
+            'clay-lg': '0 4px 12px rgba(15,23,42,0.10), 0 8px 32px rgba(15,23,42,0.08)',
+            'clay-md': '0 2px 6px rgba(15,23,42,0.08), 0 4px 16px rgba(15,23,42,0.06)',
+            'clay-sm': '0 1px 4px rgba(15,23,42,0.08), 0 2px 8px rgba(15,23,42,0.05)',
+            'clay-btn': '0 1px 3px rgba(15,23,42,0.08), 0 2px 6px rgba(15,23,42,0.05)',
+            'clay-inset': 'inset 0 2px 6px rgba(15,23,42,0.08)',
+            'clay-inset-sm': 'inset 0 1px 3px rgba(15,23,42,0.06)',
+            'glow-primary': '0 0 20px rgba(43, 5, 46, 0.4)',
           }
         }
       }
-    </script>
-    <style>
-      body {
-        font-family: 'Work Sans', sans-serif;
-        background-color: #eef2f6;
-        color: #334155;
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Work Sans', sans-serif;
+      background-color: #eef2f6;
+      color: #2B052E;
+      overflow-x: hidden;
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #eef2f6;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #c4b5a8;
+      border-radius: 6px;
+      border: 3px solid #eef2f6;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9a8a7d;
+    }
+
+    /* Modal animations */
+    .animate-fadeIn {
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .animate-scaleIn {
+      animation: scaleIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
       }
-      /* Smooth scrolling */
-      html {
-        scroll-behavior: smooth;
+
+      to {
+        opacity: 1;
       }
-      /* Custom scrollbar */
-      ::-webkit-scrollbar {
-        width: 12px;
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
       }
-      ::-webkit-scrollbar-track {
-        background: #eef2f6; 
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
       }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1; 
-        border-radius: 6px;
-        border: 3px solid #eef2f6;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8; 
-      }
-    </style>
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -85,10 +131,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body>
-    <div id="root"></div>
+
+<body>
+  <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>
