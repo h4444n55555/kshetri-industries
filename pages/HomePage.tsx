@@ -21,8 +21,8 @@ const FOUNDER = {
   name: 'Kshetrimayum Tojo Singh',
   label: 'FOUNDER',
   quote: '"NEVER GIVE IN, NEVER GIVE UP."',
-  image: '/static-site/assets/tojo_no_bg.png',
-  fallback: '/static-site/assets/tojo.jpg',
+  image: 'https://raw.githubusercontent.com/h4444n55555/images/refs/heads/main/tojo_no_bg.png',
+  fallback: 'https://raw.githubusercontent.com/h4444n55555/images/refs/heads/main/tojo_no_bg.png',
   bio: [
     { icon: 'business_center', text: 'Founded Kshetri Industries Pvt. Ltd. in 2025 as a structured evolution of six years of hands-on experience in the food and beverage sector.' },
     { icon: 'school', text: 'Holds a Bachelor of Fine Arts (BFA) — approaching product development with creativity and precision.' },
@@ -34,8 +34,8 @@ const COFOUNDER = {
   name: 'Nongmaithem Hans',
   label: 'CO-FOUNDER',
   quote: '"THE JOURNEY OF A THOUSAND MILES BEGINS WITH A SINGLE STEP."',
-  image: '/static-site/assets/hans_cropped.png',
-  fallback: '/static-site/assets/hans.jpg',
+  image: 'https://raw.githubusercontent.com/h4444n55555/images/refs/heads/main/hans_cropped.png',
+  fallback: 'https://raw.githubusercontent.com/h4444n55555/images/refs/heads/main/hans_cropped.png',
   bio: [
     { icon: 'engineering', text: 'Currently pursuing a B.Tech in Artificial Intelligence and Data Engineering at IIT Ropar.' },
     { icon: 'code', text: 'Contributes from a technology and systems perspective — building foundations in software systems, data architecture, and machine learning.' },
@@ -783,8 +783,8 @@ const HomePage: React.FC = () => {
             year: '2026',
             description: 'Kshetri Industries Pvt. Ltd. was recognized at the Northeast Entrepreneurs Meet (NEEM) 2026 with the NEB Award for Emerging Beverage Startup, honoring innovation and growth in the regional startup ecosystem.',
             images: [
-              '/static-site/assets/NEEM.jpeg',
-              '/static-site/assets/NEEM cert.jpeg',
+              'https://raw.githubusercontent.com/h4444n55555/images/refs/heads/main/NEEM.jpeg',
+              'https://raw.githubusercontent.com/h4444n55555/images/refs/heads/main/NEEM%20cert.jpeg',
             ],
           },
         ];
